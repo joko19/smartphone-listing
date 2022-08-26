@@ -1,22 +1,20 @@
 import api from "../api/api";
 import { useState, useEffect } from "react";
 import ReactStars from "react-rating-stars-component";
-import { FcLike } from "react-icons/fc";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 
 export default function Home() {
-  const [data, setData] = useState({});
   const [productList, setProductList] = useState([]);
   const [stockAvailable, SetStockAvailable] = useState(false);
   const [highRate, setHighRate] = useState(false);
   const [defaultData, setDefaultData] = useState(true);
+  const [sorting, setSorting] = useState("newest");
 
   useEffect(() => {
     const getData = async () => {
-      await api.index(1, 25).then((res) => {
+      await api.index(1, 10).then((res) => {
         setProductList(res.data.data);
-        setData(res.data);
       });
     };
     getData();
@@ -24,32 +22,39 @@ export default function Home() {
 
   const getStockAvailable = () => {
     let data = [];
-    productList.map((value) => {
-      if (value.attributes.stock !== 0) {
-        data.push(value);
-      }
-    });
+    for (let i = 0; i < productList.length; i++) {
+      if (productList[i].attributes.stock !== 0) data.push(productList[i]);
+    }
     setProductList(data);
   };
 
   const getHighRate = () => {
     let data = [];
-    productList.map((value) => {
-      if (value.attributes.rating > 4) {
-        data.push(value);
-      }
-    });
+    for (let i = 0; i < productList.length; i++) {
+      if (productList[i].attributes.rating > 4) data.push(productList[i]);
+    }
     setProductList(data);
   };
 
   const getStockAvailableWithHighRate = () => {
     let data = [];
-    productList.map((value) => {
-      if (value.attributes.stock !== 0 && value.attributes.rating > 4) {
-        data.push(value);
-      }
-    });
+    for (let i = 0; i < productList.length; i++) {
+      if (
+        productList[i].attributes.stock !== 0 &&
+        productList[i].attributes.rating > 4
+      )
+        data.push(productList[i]);
+    }
     setProductList(data);
+  };
+
+  const getBestRating = () => {
+    let data = productList;
+    data.sort((a, b) => {
+      return b.attributes.rating - a.attributes.rating;
+    });
+    console.log(data);
+    setProductList([...data]);
   };
 
   useEffect(() => {
@@ -64,6 +69,14 @@ export default function Home() {
       setDefaultData(!defaultData);
     }
   }, [highRate, stockAvailable]);
+
+  const getSorting = (type) => {
+    if (type === "review") {
+      getBestRating();
+    } else {
+      setDefaultData(!defaultData);
+    }
+  }
 
   return (
     <div>
@@ -103,8 +116,12 @@ export default function Home() {
             </div>
             <div className="flex gap-6 text-gray-500">
               <p>Urutkan</p>
-              <select className="py-1 px-4 cursor-pointer rounded-full bg-white border border-gray-300">
-                <option>Terbaru</option>
+              <select
+                className="py-1 px-4 cursor-pointer rounded-full bg-white border border-gray-300"
+                onChange={(e) => getSorting(e.target.value)}
+              >
+                <option value="newest">Terbaru</option>
+                <option value="review">Ulasan</option>
               </select>
             </div>
           </div>
@@ -113,7 +130,7 @@ export default function Home() {
               return (
                 <Link
                   to={`/${value.attributes.id}`}
-                  className="flex w-64 flex-col p-8  border border-gray-300 rounded-lg cursor-pointer ease-in ease-out"
+                  className="flex w-64 flex-col p-8  border border-gray-300 rounded-lg cursor-pointer ease-in-out"
                   key={index}
                 >
                   {value.attributes.stock < 5 ? (
@@ -138,6 +155,7 @@ export default function Home() {
                   </div>
                   <div className="flex text-gray-400 gap-2">
                     <div className="my-auto">
+                      {value.attributes.rating}
                       <ReactStars
                         count={5}
                         size={16}
