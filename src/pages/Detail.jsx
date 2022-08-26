@@ -30,7 +30,6 @@ export default function Detail() {
         </div>
         <div className="w-full">
           <h1 className="text-2xl font-bold">{dataProduct?.name}</h1>
-
           <div className="text-gray-400">
             <div className="flex  gap-2">
               <Rating rating={dataProduct?.rating} /> ({dataProduct?.rating})
@@ -38,10 +37,10 @@ export default function Detail() {
             {dataProduct?.numOfReviews} reviews
           </div>
 
-          <h1 className="text-2xl text-lime-400 font-bold my-2">{dataProduct?.points} point <span className="text-lime-700 text-sm">{"  "}In Stock</span></h1>
+          <h1 className="text-2xl text-lime-400 font-bold my-2">{dataProduct?.points} point <span className={`${dataProduct?.stock === 0 ?'text-red-500': 'text-lime-700'} text-sm`}>{"  "} {dataProduct?.stock === 0 ? 'Sold Out' : 'In Stock'}</span></h1>
           <div
             className="text-gray-800"
-            dangerouslySetInnerHTML={{ __html: dataProduct?.info }}
+            dangerouslySetInnerHTML={{ __html: dataProduct?.description }}
           />
         </div>
       </div>
@@ -55,7 +54,7 @@ export default function Detail() {
 
         <div
           className="text-gray-600 py-8"
-          dangerouslySetInnerHTML={{ __html: dataProduct?.description }}
+          dangerouslySetInnerHTML={{ __html: dataProduct?.info }}
         ></div>
       </div>
     </div>
