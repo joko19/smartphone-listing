@@ -2,7 +2,7 @@ import Header from "../components/Header";
 import { useState, useEffect } from "react";
 import api from "../api/api";
 import { useParams } from "react-router-dom";
-import ReactStars from "react-rating-stars-component";
+import Rating from "../components/Rating";
 
 export default function Detail() {
   const params = useParams();
@@ -24,21 +24,16 @@ export default function Detail() {
       <div className="my-4">
         List Product {">"} {dataProduct?.name}
       </div>
-      <div className="flex gap-8 mt-4">
+      <div className="flex flex-col md:flex-row gap-8 mt-4">
         <div className="w-full">
           <img src={dataProduct?.images} alt={dataProduct?.name} />
         </div>
         <div className="w-full">
           <h1 className="text-2xl font-bold">{dataProduct?.name}</h1>
 
-          <div className="flex text-gray-400 gap-2">
-            <div className="my-auto">
-              <ReactStars
-                count={5}
-                size={16}
-                value={dataProduct?.rating}
-                activeColor="#ffd700"
-              />
+          <div className="text-gray-400">
+            <div className="flex  gap-2">
+              <Rating rating={dataProduct?.rating} /> ({dataProduct?.rating})
             </div>
             {dataProduct?.numOfReviews} reviews
           </div>

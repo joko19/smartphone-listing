@@ -1,8 +1,8 @@
 import api from "../api/api";
 import { useState, useEffect } from "react";
-import ReactStars from "react-rating-stars-component";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
+import Rating from "../components/Rating";
 
 export default function Home() {
   const [productList, setProductList] = useState([]);
@@ -12,7 +12,7 @@ export default function Home() {
 
   useEffect(() => {
     const getData = async () => {
-      await api.index(1, 10).then((res) => {
+      await api.index(1, 20).then((res) => {
         setProductList(res.data.data);
       });
     };
@@ -75,7 +75,23 @@ export default function Home() {
     } else {
       setDefaultData(!defaultData);
     }
-  }
+  };
+
+  const addWishlist = (id, data) => {
+    // var requestOptions = {
+    //   method: 'POST',
+    //   redirect: 'follow'
+    // };
+
+    // fetch(`https://recruitment.dev.rollingglory.com/api/v2/gifts/${id}/wishlist`, requestOptions)
+    //   .then(response => response.text())
+    //   .then(result => console.log(result))
+    //   .catch(error => console.log('error', error));
+    api.wishlist(id, data).then((res) => {
+      console.log(res);
+      setDefaultData(!defaultData);
+    });
+  };
 
   return (
     <div>
@@ -127,11 +143,28 @@ export default function Home() {
           <div className="flex flex-wrap gap-4 mt-4">
             {productList.map((value, index) => {
               return (
-                <Link
-                  to={`/${value.attributes.id}`}
-                  className="flex w-64 flex-col p-8  border border-gray-300 rounded-lg cursor-pointer ease-in-out"
+                <div
+                  className="relative flex w-72 flex-col p-8  border border-gray-300 rounded-lg ease-in-out overflow-hidden"
                   key={index}
                 >
+                  {value.attributes.isNew === 1 && (
+                    <div className="absolute  top-0 right-0 bg-yellow-500  text-white p-2 text-center overflow-hidden">
+                      New
+                    </div>
+                  )}
+                  {value.attributes.rating > 4 &&
+                    value.attributes.numOfReviews > 25 &&
+                    value.attributes.isNew === 1 && (
+                      <div className="absolute top-0 right-0 bg-red-600  text-white p-2 text-center overflow-hidden">
+                        Hot Item
+                      </div>
+                    )}
+                  {value.attributes.rating > 4 &&
+                    value.attributes.numOfReviews > 25 && (
+                      <div className="absolute top-0 right-0  bg-blue-500  text-white p-2 text-center overflow-hidden">
+                        Best Seller
+                      </div>
+                    )}
                   {value.attributes.stock < 5 ? (
                     value.attributes.stock === 0 ? (
                       <div className="text-red-500"> Sold Out</div>
@@ -141,30 +174,38 @@ export default function Home() {
                   ) : (
                     <div className="text-green-500"> In Stock</div>
                   )}
-                  <div className="flex h-64  w-full">
+                  <Link
+                    to={`/${value.attributes.id}`}
+                    className="flex h-64  w-full"
+                  >
                     <img
                       src={value.attributes.images}
                       alt={value.attributes.name}
-                      className="w-full object-contain"
+                      className="w-full object-contain cursor-pointer"
                     />
-                  </div>
+                  </Link>
                   {value.attributes.name}
                   <div className="text-green-500">
                     {value.attributes.points} poins{" "}
                   </div>
-                  <div className="flex text-gray-400 gap-2">
-                    <div className="my-auto">
-                      {value.attributes.rating}
-                      <ReactStars
-                        count={5}
-                        size={16}
-                        value={value.attributes.rating}
-                        activeColor="#ffd700"
-                      />
+                  <div className="flex flex-col text-gray-400 mt-2">
+                    <div className="flex my-auto">
+                      <Rating rating={value.attributes.rating} />(
+                      {value.attributes.rating})
                     </div>
                     {value.attributes.numOfReviews} reviews{" "}
                   </div>
-                </Link>
+                  <div
+                    onClick={() => addWishlist(value.id, value)}
+                    className={`${
+                      value.attributes.isWishlist === 0
+                        ? "bg-gray-100 hover:bg-red-200"
+                        : "bg-red-500"
+                    } z-50 border rounded-xl py-2 px-4 cursor-pointer absolute right-4 bottom-4`}
+                  >
+                    <img src="/icons/love.png" alt="wishlist" className="w-4" />
+                  </div>
+                </div>
               );
             })}
           </div>
