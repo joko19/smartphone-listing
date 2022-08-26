@@ -6,24 +6,94 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 
 export default function Home() {
+  const [data, setData] = useState({});
   const [productList, setProductList] = useState([]);
+  const [stockAvailable, SetStockAvailable] = useState(false);
+  const [highRate, setHighRate] = useState(false);
+  const [defaultData, setDefaultData] = useState(true);
 
   useEffect(() => {
     const getData = async () => {
-      await api.index(1, 16).then((res) => setProductList(res.data.data));
+      await api.index(1, 25).then((res) => {
+        setProductList(res.data.data);
+        setData(res.data);
+      });
     };
     getData();
-  }, []);
+  }, [defaultData]);
+
+  const getStockAvailable = () => {
+    let data = [];
+    productList.map((value) => {
+      if (value.attributes.stock !== 0) {
+        data.push(value);
+      }
+    });
+    setProductList(data);
+  };
+
+  const getHighRate = () => {
+    let data = [];
+    productList.map((value) => {
+      if (value.attributes.rating > 4) {
+        data.push(value);
+      }
+    });
+    setProductList(data);
+  };
+
+  const getStockAvailableWithHighRate = () => {
+    let data = [];
+    productList.map((value) => {
+      if (value.attributes.stock !== 0 && value.attributes.rating > 4) {
+        data.push(value);
+      }
+    });
+    setProductList(data);
+  };
+
+  useEffect(() => {
+    // filter
+    if (highRate && !stockAvailable) {
+      getHighRate();
+    } else if (stockAvailable && !highRate) {
+      getStockAvailable();
+    } else if (stockAvailable && highRate) {
+      getStockAvailableWithHighRate();
+    } else {
+      setDefaultData(!defaultData);
+    }
+  }, [highRate, stockAvailable]);
 
   return (
     <div>
-      <Header/>
+      <Header />
       <div className="flex flex-col md:flex-row p-4 md:p-16 gap-4">
         <div className="w-full md:w-1/3">
           <h1 className="font-bold border-b pb-4">Filter</h1>
-          <div className="border-gray-300 rounded p-4 text-gray-500 border mt-4">
-            <div>Rating 4 ke atas</div>
-            <div>Stock Tersedia</div>
+          <div className="border-gray-300 rounded py-4 px-8 text-gray-500 border mt-4 ">
+            <div className="form-control flex justify-between">
+              <label className="label cursor-pointer flex justify-between w-full">
+                <span className="label-text">Rating 4 ke atas</span>
+                <input
+                  type="checkbox"
+                  className="checkbox checkbox-primary cursor-pointer"
+                  onChange={() => setHighRate(!highRate)}
+                />
+              </label>{" "}
+              {highRate}
+            </div>
+            <div className="form-control flex justify-between">
+              <label className="label cursor-pointer flex justify-between w-full">
+                <span className="label-text">Stock Tersedia</span>
+                <input
+                  type="checkbox"
+                  className="checkbox checkbox-primary cursor-pointer"
+                  onChange={() => SetStockAvailable(!stockAvailable)}
+                />
+              </label>{" "}
+              {stockAvailable}
+            </div>
           </div>
         </div>
         <div className="w-full">
@@ -43,7 +113,7 @@ export default function Home() {
               return (
                 <Link
                   to={`/${value.attributes.id}`}
-                  className="flex w-64 flex-col p-8  border border-gray-300 rounded-lg cursor-pointer"
+                  className="flex w-64 flex-col p-8  border border-gray-300 rounded-lg cursor-pointer ease-in ease-out"
                   key={index}
                 >
                   {value.attributes.stock < 5 ? (
