@@ -9,7 +9,6 @@ export default function Home() {
   const [stockAvailable, SetStockAvailable] = useState(false);
   const [highRate, setHighRate] = useState(false);
   const [defaultData, setDefaultData] = useState(true);
-  const [sorting, setSorting] = useState("newest");
 
   useEffect(() => {
     const getData = async () => {
