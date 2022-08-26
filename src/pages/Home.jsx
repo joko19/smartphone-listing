@@ -1,22 +1,23 @@
 import api from "../api/api";
 import { useState, useEffect } from "react";
+import ReactStars from "react-rating-stars-component";
+import { FcLike } from "react-icons/fc";
+import { Link } from "react-router-dom";
+import Header from "../components/Header";
 
 export default function Home() {
   const [productList, setProductList] = useState([]);
+
   useEffect(() => {
-    const listData = async () => {
+    const getData = async () => {
       await api.index(1, 16).then((res) => setProductList(res.data.data));
     };
-    listData();
-    console.log(listData.data);
+    getData();
   }, []);
 
   return (
     <div>
-      <div className="p-4">
-        <div className=" text-orange-500 text-xl">Company</div>
-        <div className="text-green-500 font-bold text-xl">Logo</div>
-      </div>
+      <Header/>
       <div className="flex flex-col md:flex-row p-4 md:p-16 gap-4">
         <div className="w-full md:w-1/3">
           <h1 className="font-bold border-b pb-4">Filter</h1>
@@ -38,27 +39,47 @@ export default function Home() {
             </div>
           </div>
           <div className="flex flex-wrap gap-4 mt-4">
-            {productList.map((value, index) => (
-              <div className="flex h-96 w-64 flex-col p-8  border border-gray-300 rounded-lg">
-                {value.attributes.stock < 5 ? (
-                  value.attributes.stock === 0 ? (
-                    <div className="text-red-500"> Sold Out</div>
+            {productList.map((value, index) => {
+              return (
+                <Link
+                  to={`/${value.attributes.id}`}
+                  className="flex w-64 flex-col p-8  border border-gray-300 rounded-lg cursor-pointer"
+                  key={index}
+                >
+                  {value.attributes.stock < 5 ? (
+                    value.attributes.stock === 0 ? (
+                      <div className="text-red-500"> Sold Out</div>
+                    ) : (
+                      <div className="text-red-500"> Stock {"<"} 5</div>
+                    )
                   ) : (
-                    <div className="text-red-500"> Stock {"<"} 5</div>
-                  )
-                ) : (
-                  <div className="text-green-500"> In Stock</div>
-                )}
-                <img
-                  src={value.attributes.images}
-                  alt={value.attributes.name}
-                  className="w-full my-auto"
-                />
-                {value.attributes.name}
-                <div className="text-green-500">{value.attributes.points} poins </div>
-                <div className="text-gray-400">{value.attributes.numOfReviews} reviews </div>
-              </div>
-            ))}
+                    <div className="text-green-500"> In Stock</div>
+                  )}
+                  <div className="flex h-64  w-full">
+                    <img
+                      src={value.attributes.images}
+                      alt={value.attributes.name}
+                      className="w-full object-contain"
+                    />
+                  </div>
+                  {value.attributes.name}
+                  <div className="text-green-500">
+                    {value.attributes.points} poins{" "}
+                  </div>
+                  <div className="flex text-gray-400 gap-2">
+                    <div className="my-auto">
+                      <ReactStars
+                        count={5}
+                        size={16}
+                        value={value.attributes.rating}
+                        activeColor="#ffd700"
+                      />
+                    </div>
+                    {value.attributes.numOfReviews} reviews{" "}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
