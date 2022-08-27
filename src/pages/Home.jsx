@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Rating from "../components/Rating";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function Home() {
   const [productList, setProductList] = useState([]);
@@ -77,7 +78,32 @@ export default function Home() {
     }
   };
 
-  const addWishlist = (id, data) => {
+  const addWishlist = (id, data, name) => {
+    // jika data belum ada di localstorage
+    if (window.localStorage.getItem(id) !== name) {
+      // maka ketika tombol di klik, data akan disimpan ke dalam localstorage sebagai wishlist
+      window.localStorage.setItem(id, name);
+      toast.success("Successfully add data to wishlist", {
+        position: "bottom-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } else {
+      // jika data sudah ada di localstorage, maka ketika tombol di klik, data akan dihapus sebagai wishlist
+      window.localStorage.removeItem(id);
+      toast.error("Data removed from wishlist", {
+        position: "bottom-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+    })}
     // var requestOptions = {
     //   method: 'POST',
     //   redirect: 'follow'
@@ -196,11 +222,14 @@ export default function Home() {
                     {value.attributes.numOfReviews} reviews{" "}
                   </div>
                   <div
-                    onClick={() => addWishlist(value.id, value)}
+                    onClick={() =>
+                      addWishlist(value.id, value, value.attributes.name)
+                    }
                     className={`${
-                      value.attributes.isWishlist === 0
-                        ? "bg-gray-100 hover:bg-red-200"
-                        : "bg-red-500"
+                      window.localStorage.getItem(value.id) ===
+                      value.attributes.name
+                        ? "bg-red-500 hover:bg-red-600"
+                        : "bg-gray-500 hover:bg-red-200"
                     } z-50 border rounded-xl py-2 px-4 cursor-pointer absolute right-4 bottom-4`}
                   >
                     <img src="/icons/love.png" alt="wishlist" className="w-4" />
@@ -211,6 +240,17 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
